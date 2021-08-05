@@ -1,4 +1,5 @@
 const nameInput = document.getElementById('name');
+const emailInput = document.getElementById('email');
 
 // 'name' input gets focus by default
 nameInput.focus();
@@ -104,3 +105,56 @@ payMethod.addEventListener('change', e => {
 });
 // end "Payment Info"
 ////
+
+
+////
+// form validation functions
+function validateName(name) {
+  const hintSpan = document.getElementById('name-hint');
+  if (!name) {
+    hintSpan.style.display = 'inline';
+  } else {
+    hintSpan.style.display = 'none';
+  }
+}
+
+function validateEmail(email) {
+  let error = '';
+  const hintMsgs = {
+    noAt: "Email address must contain '@' symbol",
+    noSuffix: "Email address must contain domain suffix, e.g. '.com'",
+    other: "Email address must be in the format: name@domain.com"
+  }
+  const hintSpan = document.getElementById('email-hint');
+  
+  if (!/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)) {
+    hintSpan.style.display = 'inline';
+    if (!/\.[a-z]i{2,}$/.test(email)) {
+      error = hintMsgs.noSuffix;
+    }
+    if (!/^(\w@)i([A-Za-z]+[A-Za-z0-9\-]*[A-Za-z]){3,253}/.test(email)) {
+      error = hintMsgs.other;
+    }
+    if (!/@/.test(email)) {
+      error = hintMsgs.noAt;
+    }
+  } else {
+    hintSpan.style.display = 'none';
+  }
+  hintSpan.innerHTML = error;
+}
+
+  // validation event listeners
+nameInput.addEventListener('blur', () => {
+  validateName(nameInput.value)
+});
+nameInput.addEventListener('keyup', () => {
+  validateName(nameInput.value)
+});
+
+emailInput.addEventListener('blur', () => {
+  validateEmail(emailInput.value)
+});
+emailInput.addEventListener('keyup', () => {
+  validateEmail(emailInput.value)
+});
