@@ -1,5 +1,6 @@
 const nameInput = document.getElementById('name');
 const emailInput = document.getElementById('email');
+const ccNumInput = document.getElementById('cc-num');
 
 // 'name' input gets focus by default
 nameInput.focus();
@@ -44,12 +45,10 @@ shirtDesignSelector.addEventListener('change', design => {
       option.setAttribute('hidden', '');
     } else {
       option.removeAttribute('hidden');
+
       // set first available option as 'selected'
-      if (!first) {
-        first = i;
-      } else {
-        colorSelector.children[first].selected = true;
-      }
+      if (!first) first = i;
+      colorSelector.children[first].selected = true;
     }
   }
 });
@@ -64,10 +63,11 @@ const activitiesBox = document.getElementById('activities-box');
 const activitiesCostP = document.getElementById('activities-cost');
 
 activitiesBox.addEventListener('change', e => {
+  const price = Number(e.target.getAttribute('data-cost'));
   if (e.target.checked) {
-    total += Number(e.target.getAttribute('data-cost'));
+    total += price;
   } else {
-    total -= Number(e.target.getAttribute('data-cost'));
+    total -= price;
   };
   activitiesCostP.innerHTML = `Total: $${total}`;
 });
@@ -109,52 +109,156 @@ payMethod.addEventListener('change', e => {
 
 ////
 // form validation functions
-function validateName(name) {
-  const hintSpan = document.getElementById('name-hint');
-  if (!name) {
-    hintSpan.style.display = 'inline';
-  } else {
-    hintSpan.style.display = 'none';
+const nameTest = name => {
+  if (name) {
+    return 'valid';
   }
 }
 
-function validateEmail(email) {
-  let error = '';
-  const hintMsgs = {
-    noAt: "Email address must contain '@' symbol",
-    noSuffix: "Email address must contain domain suffix, e.g. '.com'",
-    other: "Email address must be in the format: name@domain.com"
+const emailTest = email => {
+  if (/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)) {
+    return 'valid';
   }
-  const hintSpan = document.getElementById('email-hint');
+  if (!/@{1}/.test(email)) {
+    return 'noAt';
+  }
+  if (!/^\S+@\w{3,}$/.test(email)) {
+    return 'noDomain';
+  }
+  if (!/$\S+@\S+\.[a-z]i{2,}$/.test(email)) {
+    return 'noSuffix';
+  }
+  return 'other';
+}
+
+const ccNumTest = num => {
+  if (!Number(num) && Number(num) !== 0) {
+    return 'notNumber';
+  }
+  if (num.length < 13) {
+    return 'tooShort';
+  }
+  if (num.length > 16) {
+    return 'tooLong';
+  }
+  if (Number(num) === 0) {
+    return 'zero';
+  }
+  return 'valid';
+}
   
-  if (!/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)) {
-    hintSpan.style.display = 'inline';
-    if (!/\.[a-z]i{2,}$/.test(email)) {
-      error = hintMsgs.noSuffix;
-    }
-    if (!/^(\w@)i([A-Za-z]+[A-Za-z0-9\-]*[A-Za-z]){3,253}/.test(email)) {
-      error = hintMsgs.other;
-    }
-    if (!/@/.test(email)) {
-      error = hintMsgs.noAt;
-    }
+function validateText(inputId) {
+  // inputId = id of input element to test
+  const value = document.getElementById(inputId).value;
+  const testFuncName = camelify(inputId) + 'Test';
+  if (!value) {
+    return 'blank';
+  } else if (eval(testFuncName)(value) === 'valid') {
+    return 'valid';
   } else {
-    hintSpan.style.display = 'none';
+    return eval(testFuncName)(value);
   }
-  hintSpan.innerHTML = error;
 }
 
   // validation event listeners
+const hintMsgs = {
+  email: {
+    blank: "Email address cannot be blank",
+    noAt: "Email address must contain '@' symbol",
+    noDomain: "Email address must contain a domain name after the '@', e.g. 'gmail.com'",
+    noSuffix: "Email address must contain domain suffix, e.g. '.com'",
+    other: "Email address must be in the format: name@domain.com"
+  },
+  ccNum: {
+    blank: 'Credit card number cannot be blank',
+    notNumber: 'Only numeric characters allowed',
+    tooShort: 'Credit card number must be at least 13 digits',
+    tooLong: 'Credit card number can be no more than 16 digits',
+    zero: 'All zeroes is not a valid credit card number'
+  }
+}
+
 nameInput.addEventListener('blur', () => {
-  validateName(nameInput.value)
+  const hintSpan = document.getElementById('name-hint');
+  if (validateText('name') === 'valid') {
+    hintSpan.style.display = 'none';
+  } else {
+    hintSpan.style.display = 'inline';
+  }
 });
 nameInput.addEventListener('keyup', () => {
-  validateName(nameInput.value)
+  const hintSpan = document.getElementById('name-hint');
+  if (validateText('name') === 'valid') {
+    hintSpan.style.display = 'none';
+  } else {
+    hintSpan.style.display = 'inline';
+  }
 });
 
 emailInput.addEventListener('blur', () => {
-  validateEmail(emailInput.value)
+  const hintSpan = document.getElementById('email-hint');
+  if (validateText('email') === 'valid') {
+    hintSpan.style.display = 'none';
+  } else {
+    hintSpan.style.display = 'inline';
+    hintSpan.innerHTML = hintMsgs.email[validateText('email')];
+  }
 });
 emailInput.addEventListener('keyup', () => {
-  validateEmail(emailInput.value)
+  const hintSpan = document.getElementById('email-hint');
+  if (validateText('email') === 'valid') {
+    hintSpan.style.display = 'none';
+  } else {
+    hintSpan.style.display = 'inline';
+    hintSpan.innerHTML = hintMsgs.email[validateText('email')];
+  }
 });
+
+ccNumInput.addEventListener('blur', () => {
+  const hintSpan = document.getElementById('cc-hint');
+  if (validateText('cc-num') === 'valid') {
+    hintSpan.style.display = 'none';
+  } else {
+    hintSpan.style.display = 'inline';
+    hintSpan.innerHTML = hintMsgs.ccNum[validateText('cc-num')];
+  }
+});
+ccNumInput.addEventListener('keyup', () => {
+  const hintSpan = document.getElementById('cc-hint');
+  if (validateText('cc-num') === 'valid') {
+    hintSpan.style.display = 'none';
+  } else {
+    hintSpan.style.display = 'inline';
+    hintSpan.innerHTML = hintMsgs.ccNum[validateText('cc-num')];
+  }
+});
+
+
+// function to convert id's containing '-' to camel case
+function camelify(text) {
+  const arr = text.split('-');
+  if (arr.length === 1) {
+    return arr[0].toLowerCase();
+  }
+  let camel = arr[0].toLowerCase();
+  for (let i = 1; i < arr.length; i++) {
+    camel += arr[i][0].toUpperCase() + arr[i].slice(1).toLowerCase();
+  }
+  return camel;
+}
+
+
+
+  // nameInput.addEventListener('blur', () => {
+//   validateName(nameInput.value)
+// });
+// nameInput.addEventListener('keyup', () => {
+//   validateName(nameInput.value)
+// });
+
+// emailInput.addEventListener('blur', () => {
+//   validateEmail(emailInput.value)
+// });
+// emailInput.addEventListener('keyup', () => {
+//   validateEmail(emailInput.value)
+// });
