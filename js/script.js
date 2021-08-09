@@ -1,6 +1,8 @@
 const nameInput = document.getElementById('name');
 const emailInput = document.getElementById('email');
 const ccNumInput = document.getElementById('cc-num');
+const zipInput = document.getElementById('zip');
+const cvvInput = document.getElementById('cvv');
 
 // 'name' input gets focus by default
 nameInput.focus();
@@ -146,6 +148,20 @@ const ccNumTest = num => {
   }
   return 'valid';
 }
+
+const zipTest = num => {
+  if (num.length !== 5) return 'blank';
+  if (Number(num) === 0 && num.length > 0) return 'zero';
+  if (!Number(num) && num.length > 0) return 'notNumber';
+  return 'valid';
+}
+
+const cvvTest = num => {
+  if (num.length !== 3) return 'blank';
+  if (Number(num) === 0 && num.length > 0) return 'zero';
+  if (!Number(num) && num.length > 0) return 'notNumber';
+  return 'valid';
+}
   
 function validateText(inputId) {
   // inputId = id of input element to test
@@ -175,6 +191,16 @@ const hintMsgs = {
     tooShort: 'Credit card number must be at least 13 digits',
     tooLong: 'Credit card number can be no more than 16 digits',
     zero: 'All zeroes is not a valid credit card number'
+  },
+  zip: {
+    blank: 'Zip code must be 5 digits',
+    notNumber: 'Only numeric characters allowed',
+    zero: 'All zeroes is not a valid zip code'
+  }, 
+  cvv: {
+    blank: 'CVV must be 3 digits',
+    notNumber: 'Only numeric characters allowed',
+    zero: 'All zeroes is not a valid CVV'
   }
 }
 
@@ -233,6 +259,45 @@ ccNumInput.addEventListener('keyup', () => {
   }
 });
 
+zipInput.addEventListener('keyup', () => {
+  const hintSpan = document.getElementById('zip-hint');
+  if (validateText('zip') === 'valid') {
+    hintSpan.style.display = 'none';
+  } else {
+    hintSpan.style.display = 'inline';
+    hintSpan.innerHTML = hintMsgs.zip[validateText('zip')];
+  }
+});
+zipInput.addEventListener('blur', () => {
+  const hintSpan = document.getElementById('zip-hint');
+  if (validateText('zip') === 'valid') {
+    hintSpan.style.display = 'none';
+  } else {
+    hintSpan.style.display = 'inline';
+    hintSpan.innerHTML = hintMsgs.zip[validateText('zip')];
+  }
+});
+
+
+cvvInput.addEventListener('keyup', () => {
+  const hintSpan = document.getElementById('cvv-hint');
+  if (validateText('cvv') === 'valid') {
+    hintSpan.style.display = 'none';
+  } else {
+    hintSpan.style.display = 'inline';
+    hintSpan.innerHTML = hintMsgs.cvv[validateText('cvv')];
+  }
+});
+cvvInput.addEventListener('blur', () => {
+  const hintSpan = document.getElementById('cvv-hint');
+  if (validateText('cvv') === 'valid') {
+    hintSpan.style.display = 'none';
+  } else {
+    hintSpan.style.display = 'inline';
+    hintSpan.innerHTML = hintMsgs.cvv[validateText('cvv')];
+  }
+});
+
 
 // function to convert id's containing '-' to camel case
 function camelify(text) {
@@ -248,17 +313,3 @@ function camelify(text) {
 }
 
 
-
-  // nameInput.addEventListener('blur', () => {
-//   validateName(nameInput.value)
-// });
-// nameInput.addEventListener('keyup', () => {
-//   validateName(nameInput.value)
-// });
-
-// emailInput.addEventListener('blur', () => {
-//   validateEmail(emailInput.value)
-// });
-// emailInput.addEventListener('keyup', () => {
-//   validateEmail(emailInput.value)
-// });
