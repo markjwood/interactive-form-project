@@ -119,8 +119,6 @@ payMethod.addEventListener('change', e => {
 // form validation
 const form = document.querySelector('form');
 
-const dontTest = ['size', 'design', 'color', 'title', 'payment', 'exp-month', 'exp-year'];
-
   // validation tests
 const tests = {
   name: {
@@ -233,7 +231,7 @@ form.addEventListener('submit', e => {
     if (id === 'exp-month' && payMethod.value !== 'credit-card') {
       break;
     }
-    
+
     const inputElement = document.getElementById(id);
     const hintSpan = id === 'cc-num' ?
       document.getElementById('cc-hint') :
