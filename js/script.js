@@ -118,6 +118,15 @@ payMethod.addEventListener('change', e => {
 ////
 // form validation
 const form = document.querySelector('form');
+const idsToTest = [
+  'name',
+  'email',
+  'exp-month',
+  'exp-year',
+  'cc-num',
+  'zip',
+  'cvv'
+];
 
   // validation tests
 const tests = {
@@ -197,7 +206,6 @@ function validate(inputId) {
   let error;
   if (inputValue) {
     for (let toTest in tests[camelify(inputId)]) {
-      console.log(toTest);
       if (tests[camelify(inputId)][toTest][0].test(inputValue)) {
         passed = true;
       } else {
@@ -212,18 +220,57 @@ function validate(inputId) {
   return [passed, error];
 }
 
+  // real-time validation event listeners
+for (let id of idsToTest) {
+  const inputElement = document.getElementById(id);
+  const hintSpan = id === 'cc-num' ?
+    document.getElementById('cc-hint') :
+    document.getElementById(id + '-hint');
+
+  if (!id.includes('exp-')) {
+    inputElement.addEventListener('keyup', () => {
+      // validate on keyup
+      if (!validate(id)[0]) {
+        inputElement.parentElement.classList.add('not-valid');
+        inputElement.parentElement.classList.remove('valid');
+        
+        if (hintSpan && hintSpan !== undefined) {
+          hintSpan.style.display = 'block';
+          hintSpan.innerHTML = validate(id)[1];
+        }
+      } else {
+        inputElement.parentElement.classList.add('valid');
+        inputElement.parentElement.classList.remove('not-valid');
+        // hide hint message
+        if (hintSpan) {
+          hintSpan.style.display = 'none';
+        }
+      }
+    });
+  }
+  inputElement.addEventListener('blur', () => {
+    // validate on blur
+    if (!validate(id)[0]) {
+      inputElement.parentElement.classList.add('not-valid');
+      inputElement.parentElement.classList.remove('valid');
+      
+      if (hintSpan) {
+        hintSpan.style.display = 'block';
+        hintSpan.innerHTML = validate(id)[1];
+      }
+    } else {
+      inputElement.parentElement.classList.add('valid');
+      inputElement.parentElement.classList.remove('not-valid');
+      // hide hint message
+      if (hintSpan) {
+        hintSpan.style.display = 'none';
+      }
+    }
+  });
+}
+
 form.addEventListener('submit', e => {
   // e.preventDefault(); // delete this
-
-  const idsToTest = [
-    'name',
-    'email',
-    'exp-month',
-    'exp-year',
-    'cc-num',
-    'zip',
-    'cvv'
-  ];
 
   for (let id of idsToTest) {
     // break loop on credit card info
@@ -236,23 +283,19 @@ form.addEventListener('submit', e => {
     const hintSpan = id === 'cc-num' ?
       document.getElementById('cc-hint') :
       document.getElementById(id + '-hint');
-    console.log (`line 230 ${id} hintspan`, hintSpan);
 
 
     if (!validate(id)[0]) {
       e.preventDefault();
-      console.log(id, 'failed');
 
       inputElement.parentElement.classList.add('not-valid');
       inputElement.parentElement.classList.remove('valid');
       
-      if (hintSpan && hintSpan !== undefined) {
-        console.log('hintSpan:', hintSpan);
+      if (hintSpan) {
         hintSpan.style.display = 'block';
         hintSpan.innerHTML = validate(id)[1];
       }
     } else {
-      console.log(id, 'passed');
       inputElement.parentElement.classList.add('valid');
       inputElement.parentElement.classList.remove('not-valid');
       // hide hint message
