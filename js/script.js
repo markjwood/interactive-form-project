@@ -121,6 +121,7 @@ const form = document.querySelector('form');
 const idsToTest = [
   'name',
   'email',
+  'activities',
   'exp-month',
   'exp-year',
   'cc-num',
@@ -204,7 +205,14 @@ function validate(inputId) {
   const inputValue = inputElement.value;
   let passed = false;
   let error;
-  if (inputValue) {
+
+  if (inputId === 'activities') {
+    if (totalCost > 0) {
+      passed = true;
+    } else {
+      error = 'Choose at least one activity';
+    }
+  } else if (inputValue) {
     for (let toTest in tests[camelify(inputId)]) {
       if (tests[camelify(inputId)][toTest][0].test(inputValue)) {
         passed = true;
@@ -220,100 +228,58 @@ function validate(inputId) {
   return [passed, error];
 }
 
-  // real-time validation event listeners
-for (let id of idsToTest) {
-  const inputElement = document.getElementById(id);
+function displayHint(id) {
+  const inputElement = id === 'activities' ?
+    activitiesBox :
+    document.getElementById(id);
   const hintSpan = id === 'cc-num' ?
     document.getElementById('cc-hint') :
     document.getElementById(id + '-hint');
+  const isValid = validate(id)[0];
+  const hint = validate(id)[1];
+  
+  if (!isValid) {
+    inputElement.parentElement.classList.add('not-valid');
+    inputElement.parentElement.classList.remove('valid');
+    
+    if (hintSpan) {
+      hintSpan.style.display = 'block';
+      hintSpan.innerHTML = hint;
+    }
+    return false;
+  } else {
+    inputElement.parentElement.classList.add('valid');
+    inputElement.parentElement.classList.remove('not-valid');
+    if (hintSpan) {
+      hintSpan.style.display = 'none';
+    }
+    return true;
+  }
+}
 
-  if (!id.includes('exp-')) {
+  // real-time validation event listeners
+for (let id of idsToTest) {
+  const inputElement = document.getElementById(id);
+
+  if (inputElement.tagName !== 'OPTION') {
     inputElement.addEventListener('keyup', () => {
-      // validate on keyup
-      if (!validate(id)[0]) {
-        inputElement.parentElement.classList.add('not-valid');
-        inputElement.parentElement.classList.remove('valid');
-        
-        if (hintSpan && hintSpan !== undefined) {
-          hintSpan.style.display = 'block';
-          hintSpan.innerHTML = validate(id)[1];
-        }
-      } else {
-        inputElement.parentElement.classList.add('valid');
-        inputElement.parentElement.classList.remove('not-valid');
-        // hide hint message
-        if (hintSpan) {
-          hintSpan.style.display = 'none';
-        }
-      }
+      displayHint(id);
     });
   }
   inputElement.addEventListener('blur', () => {
-    // validate on blur
-    if (!validate(id)[0]) {
-      inputElement.parentElement.classList.add('not-valid');
-      inputElement.parentElement.classList.remove('valid');
-      
-      if (hintSpan) {
-        hintSpan.style.display = 'block';
-        hintSpan.innerHTML = validate(id)[1];
-      }
-    } else {
-      inputElement.parentElement.classList.add('valid');
-      inputElement.parentElement.classList.remove('not-valid');
-      // hide hint message
-      if (hintSpan) {
-        hintSpan.style.display = 'none';
-      }
-    }
+    displayHint(id);
   });
 }
 
 form.addEventListener('submit', e => {
-  // e.preventDefault(); // delete this
-
   for (let id of idsToTest) {
     // break loop on credit card info
-    // if credit card not selected
+    // if 'Credit Card' not selected
     if (id === 'exp-month' && payMethod.value !== 'credit-card') {
       break;
     }
 
-    const inputElement = document.getElementById(id);
-    const hintSpan = id === 'cc-num' ?
-      document.getElementById('cc-hint') :
-      document.getElementById(id + '-hint');
-
-
-    if (!validate(id)[0]) {
-      e.preventDefault();
-
-      inputElement.parentElement.classList.add('not-valid');
-      inputElement.parentElement.classList.remove('valid');
-      
-      if (hintSpan) {
-        hintSpan.style.display = 'block';
-        hintSpan.innerHTML = validate(id)[1];
-      }
-    } else {
-      inputElement.parentElement.classList.add('valid');
-      inputElement.parentElement.classList.remove('not-valid');
-      // hide hint message
-      if (hintSpan) {
-        hintSpan.style.display = 'none';
-      }
-    }
-  }
-
-  if (totalCost === 0) {
-    e.preventDefault();
-    activitiesBox.parentElement.classList.add('not-valid');
-    activitiesBox.parentElement.classList.remove('valid');
-    activitiesBox.parentElement.lastElementChild.style.display = 'block';
-  } else {
-    activitiesBox.parentElement.classList.add('valid');
-    activitiesBox.parentElement.classList.remove('not-valid');
-    activitiesBox.parentElement.lastElementChild.style.display = 'none';
+    if (!displayHint(id)) e.preventDefault();
   }
 });
 
