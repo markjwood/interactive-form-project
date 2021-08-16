@@ -78,7 +78,7 @@ activitiesBox.addEventListener('change', e => {
     busyTimes.push(e.target.getAttribute('data-day-and-time'));
   } else {
     totalCost -= eventPrice;
-    busyTimes.splice(busyTimes.indexOf(e.target.getAttribute('data-day-and-time')));
+    busyTimes.splice(busyTimes.indexOf(e.target.getAttribute('data-day-and-time')), 1);
   };
   activitiesCostP.innerHTML = `Total: $${totalCost}`;
 
