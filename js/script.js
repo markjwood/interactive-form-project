@@ -68,14 +68,34 @@ for (let check of activityCheckboxes) {
   });
 }
 
+let busyTimes = [];
 activitiesBox.addEventListener('change', e => {
   const eventPrice = +e.target.getAttribute('data-cost');
+  const labels = activitiesBox.querySelectorAll('label');
+
   if (e.target.checked) {
     totalCost += eventPrice;
+    busyTimes.push(e.target.getAttribute('data-day-and-time'));
   } else {
     totalCost -= eventPrice;
+    busyTimes.splice(busyTimes.indexOf(e.target.getAttribute('data-day-and-time')));
   };
   activitiesCostP.innerHTML = `Total: $${totalCost}`;
+
+  // disable events with duplicate times
+  for (let label of labels) {
+    const input = label.firstElementChild;
+    const time = input.getAttribute('data-day-and-time');
+    if (!input.checked) {
+      if (busyTimes.includes(time)) {
+        input.disabled = true;
+        label.classList.add('disabled');
+      } else {
+        input.disabled = false;
+        label.classList.remove('disabled');
+      }
+    }
+  }
 });
 // end "Register for activities"
 ////
